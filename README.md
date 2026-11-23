@@ -6,7 +6,7 @@
 Bu depo, **ASTRON** projesi kapsamında hazırlanan teknik belgeleri, görev raporlarını ve simülasyon çıktılarını içermektedir.
 
 ## Proje Özeti
-Buraya projenizin amacını ve neler yaptığınızı anlatan 2-3 cümle yazabilirsiniz.
+Gerekli teorik bilgiler eşliğinde yapılan araştırmalar sonucu kullandığımız simülasyon programlarının temel mantığın anlaşılması,  simülasyonlar ile teorik bilgileri deneye (simülasyona) dönüştürüp gerekli testler yapmak.
 
 ## Klasör Yapısı
 
