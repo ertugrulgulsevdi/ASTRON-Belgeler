@@ -1,0 +1,22 @@
+PX4 Nedir?
+PX4, İnsansiz bir çok aracın otonom kullanımı için geliştirilmiş bir uygulamadır. Açık kaynaklı olduğu için herkes istediği anlamda uygulamayı geliştirme imaknına sahiptir. Aslında tek başına kullanılabilenbilen bir uçuş similasyonudur. Kendi yazıdığımız kodlarla da PX4 içinde fonksiyonlar oluşturma imkanına da sahibiz.
+Neden PX4 kullanıyoruz?
+Gerçek zamanlı iletişim imkanı bize sağlıyabiliyor yani kullandığım insansız araca çok kısa zaman içerisinde bir bilgi gönderip o bilginin karşılığını insansız aracımızda görme imkanina sahibiz.
+Gerçek hayatta uçuş yapmadan önce eğer kendimize göre bir algoritma geliştirdiysek onu test etme ortamı olarak kullanabiliriz.
+Birkçok farklı insansız aracı desteklediği için ister Sabit kanatlı,Drone,VTOL gibi birçok farklı insansız aracı test edebilmemize yarıyor.
+SITL Nedir?
+SITL gerçek bir uçuş kontrol kartı veya fiziksel bir insansız araç olmadan PX4 yazılımı ile derlenip bir simülatöre bağlanarak çalışmasında rol oynar.
+Gazebo Nedir?
+Gazebo PX4 ile birlikte çalışan bir 3D simülasyon ortamıdır. PX4'da kodlar ile uğraşırken artık o kodlar yerine 3D görüntüye geçip istediğimiz fizik bilgilerini 3D simülasyon programına işyerek istenilen ortamda insansız aracın testlerini yapma imkanı bize sunuyor. Gerekli sensörlerle de senkron çalışabildiğinden tercih edilirler.
+QGround Control Station Nedir?
+Aslında PX4 ve gazebo ile birlikte çalışan bir kontrol ekranıdır. QGC'de otonom için birçok işlevi gerçekleştiriyoruz. İnsansız aracımızın hangi konumda yol alacağını, o konuma giderken nasıl bir yol izleyeceğini,  hızını, ivmesini, yüksekliğini, hava hızını ayarlabildiğimiz yerdir. Gerekli güvenlik protokolleri içinde barındıran yani uçuşta herhangi bir yanlış durum olduğu tespit edildiğinde insansız aracın başlangıç noktasına güvenle dönmesini sağlama imkanı sunar. Bunungibi birçok işlevi daha mevcuttu sensörler, parametreler, hangi insansız aracı seçeceğimiz vb. birçok şeyi seçip düzenleme imkanı sunmakta olan kontrol ekranıdır. İnsansız aracın otonom görevi boyunca bulunduğu konumu ivemyi vb. şeyleri analiz etmek için gerekli uçuş kayıtlarını kaydedip analiz etmemize de olanak sağlayan bir programdır.
+MAVLink Nedir?
+MAVLink (Micro Air Vehicle Link), insansız aracımı test etmekte kullandığımız ve üstüne eklediğimiz birçok eklentinin birbiri ile veri alışverişi sağlayan bir haberleşme protokolüdür.
+MAVSDK Nedir?
+MAVSDK kısaca, Mavlink'te zor olan kod yazmanın daha kolaya indirgenmiş hali denebilir. İnsansız araçları destekleyen bir kütüphaneye sahiptir. Yani MAVSDK insansız aracımız ile haberleşebildiğimiz, insansız aracın bize gönderdiği konum,irtifa,hız vb. bilgileri istersek kaydedip analizlerlerde veya isteğimize göre şekillendirebildiğimiz bir haberleşme aracıdır.
+PX4 ve ROS2 Nasıl Birlikte çalışır?
+PX4 sürekli olarak insansız araç ile iletişim halinde oluyor bu sırada sürekli bir bilgi alışverişi sürüyor, bu bilgi alışverişlerinde PX4 aldığı bilgileri daha düşük boyutlu CDR formatına dönüştürüp bir yayın yapar. Yapılan yayında ROS2 kendisine mi gönderildiğini üç şeye bakarak karar veriyor bunlar:
+Topic Adı
+Mesaj Tipi
+QoS (Hizmet KAlitesi) ayarları
+bu üç şart eğer sağlanıyor veri akışı gerçekleşiyor. Gerçekteleşen veri akışı sonrası ROS2'ya gelen CDR kodları ROS2 için anlamsız olduğunda onu anlamlı bitler haline getirip okumaya başlar.

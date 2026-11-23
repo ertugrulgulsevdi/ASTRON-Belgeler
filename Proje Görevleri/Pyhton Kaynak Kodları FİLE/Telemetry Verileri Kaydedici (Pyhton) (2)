@@ -1,0 +1,129 @@
+cat << 'EOF' > ~/fixed-wing-autonomous-mission/src/fixed_wing_mission.py
+import asyncio
+import math
+from mavsdk import System
+
+
+telemetry_data = {
+    "lat": 0.0,
+    "lon": 0.0,
+    "rel_alt": 0.0,
+    "speed_m_s": 0.0,
+    "flight_mode": "UNKNOWN",
+    "in_air": False,
+    "wp_current": 0,
+    "wp_total": 0,
+}
+
+
+async def track_position(drone: System):
+    async for position in drone.telemetry.position():
+        telemetry_data["lat"] = position.latitude_deg
+        telemetry_data["lon"] = position.longitude_deg
+        telemetry_data["rel_alt"] = position.relative_altitude_m
+
+
+async def track_velocity(drone: System):
+    async for vel in drone.telemetry.velocity_ned():
+        ground_speed = math.sqrt(vel.north_m_s**2 + vel.east_m_s**2)
+        telemetry_data["speed_m_s"] = ground_speed
+
+
+async def track_flight_mode(drone: System):
+    async for mode in drone.telemetry.flight_mode():
+        telemetry_data["flight_mode"] = str(mode)
+
+
+async def track_in_air(drone: System):
+    async for in_air in drone.telemetry.in_air():
+        telemetry_data["in_air"] = in_air
+
+
+async def track_mission_progress(drone: System):
+    async for progress in drone.mission_raw.mission_progress():
+        telemetry_data["wp_current"] = progress.current
+        telemetry_data["wp_total"] = progress.total
+
+
+async def print_telemetry_loop():
+    print("\n--- CANLI TELEMETRİ BAŞLATILDI ---")
+    while True:
+        print(
+            f"[MOD: {telemetry_data['flight_mode']:<10}] "
+            f"WP: {telemetry_data['wp_current']}/{telemetry_data['wp_total']} | "
+            f"İrtifa: {telemetry_data['rel_alt']:6.1f} m | "
+            f"Hız: {telemetry_data['speed_m_s']:5.1f} m/s | "
+            f"Konum: ({telemetry_data['lat']:.6f}, {telemetry_data['lon']:.6f}) | "
+            f"Havada: {'Evet' if telemetry_data['in_air'] else 'Hayır'}"
+        )
+        await asyncio.sleep(1.0)
+
+
+async def run():
+    drone = System()
+    print("PX4 SITL'e bağlanılıyor (udp://:14540)...")
+    await drone.connect(system_address="udp://:14540")
+
+    async for state in drone.core.connection_state():
+        if state.is_connected:
+            print("✔ İHA bağlantısı kuruldu.")
+            break
+
+    print("GPS, Home konumu ve Arm durumu bekleniyor...")
+    async for health in drone.telemetry.health():
+        if (
+            health.is_global_position_ok
+            and health.is_home_position_ok
+            and health.is_armable
+        ):
+            print("✔ İHA uçuşa ve arm edilmeye hazır.")
+            break
+
+    print("PX4 üzerindeki yüklü görev kontrol ediliyor...")
+    mission_items = await drone.mission_raw.download_mission()
+    if not mission_items:
+        print("✖ HATA: PX4 üzerinde yüklü görev bulunamadı! Önce QGroundControl'den görev yükleyin.")
+        return
+
+    print(f"✔ {len(mission_items)} adımlık görev doğrulandı.")
+
+    tasks = [
+        asyncio.create_task(track_position(drone)),
+        asyncio.create_task(track_velocity(drone)),
+        asyncio.create_task(track_flight_mode(drone)),
+        asyncio.create_task(track_in_air(drone)),
+        asyncio.create_task(track_mission_progress(drone)),
+        asyncio.create_task(print_telemetry_loop()),
+    ]
+
+    try:
+        print("İHA arm ediliyor...")
+        await drone.action.arm()
+        print("✔ İHA arm edildi.")
+
+        print("Otonom görev (Mission) başlatılıyor...")
+        await drone.mission_raw.start_mission()
+        print("✔ Görev başlatıldı.")
+
+        was_in_air = False
+        while True:
+            if telemetry_data["in_air"]:
+                was_in_air = True
+
+            if was_in_air and not telemetry_data["in_air"]:
+                print("\n✔ İHA inişini tamamladı. Görev başarıyla sona erdi.")
+                break
+
+            await asyncio.sleep(1.0)
+
+    except Exception as e:
+        print(f"\n✖ Çalışma sırasında hata oluştu: {e}")
+    finally:
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+
+
+if __name__ == "__main__":
+    asyncio.run(run())
+EOF

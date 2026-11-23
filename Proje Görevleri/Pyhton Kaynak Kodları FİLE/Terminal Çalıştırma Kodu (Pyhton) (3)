@@ -1,0 +1,3 @@
+cd ~/fixed-wing-autonomous-mission/src
+python3 fixed_wing_mission.py
+

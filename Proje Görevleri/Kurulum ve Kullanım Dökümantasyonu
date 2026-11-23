@@ -1,0 +1,28 @@
+İlk başta Simülasyon programlarını çalıştırmak için Ubuntu 22.03.05 TLS'nin ISO dosyasını Rufus yardımıyla 8gb'dan büyük bir USB FlashDisk'e yüklüyoruz. Wİndows üzerinden Bitlocker'ı kapatmamız ve Windows üzerinden Ubuntu için gerekli bir alan yaklaşık 100gb ayıroruz. Bilgisayarı yeniden başlatıp BOOT seçeneğinden USB diskimizi seçip "f10"'a basıp kaydediyoruz. Bilgisayar açılınca Ubuntu kurulumuna atıyor, lazım olan seçenekleri seçip ilerliyoruz. Bizim için kritik nokta hem windows hem de ubuntuyu aynı bilgisayar üzerinde kullanmak istememiz bunun için ubuntu kurarken hem windows hem de ubuntu kullanmamızı sağlayan butona tik atıyoruz. Her şey sorunsuz ilerledikten sonra Ubuntu'ya giriş yapıyoruz, bu sırada bilgisayar saatlerinde sıkıntı çıkabiliyor onu istersek düzeltmemiz gerekiyor.
+Ubuntu kurulduktan sonra Sağ üstten internete bağlanıp Ctrl+Alt+T tuşlarına basıp terminali açabiliyoruz. Açılan terminalden sırasıyla gerekli olan 
+PX4 SITL (sudo apt install -y git
+git clone https://github.com/PX4/PX4-Autopilot.git --recursive)
+(bash ./PX4-Autopilot/Tools/setup/ubuntu.sh),
+
+QGroundControl (QGC) (chmod +x ./QGroundControl-x86_64.AppImage
+./QGroundControl-x86_64.AppImage) ve 
+
+MAVSDK'yı (sudo apt install -y python3-venv python3-pip
+python3 -m venv ~/mavsdk_env
+source ~/mavsdk_env/bin/activate
+pip install mavsdk)
+
+kuruyoruz.
+
+Her şeyi kurduktan sonra sırasıyla PX4, QGC ve MAVSDK'yı çalıştırıyoruz.
+PX4 için terminale şu kodu giriyoruz:
+cd ~/PX4-Autopilot
+make px4_sitl gz_x500
+QGroundControl için terminale şu kodu giriyoruz:
+cd ~/Downloads
+./QGroundControl-x86_64.AppImage
+MAVSDK için ilk baş sanal ortamı aktif ediyoruz:
+source ~/mavsdk_env/bin/activate
+İstersek ufak bir kod yazıp çalışıp çalışmadığını test edebiliriz.
+PX4 ilk açıldığında Karşımıza Gazebo ekranı açılıyor. Gazebo ekranında onümüzde "gz_x500" adında bir drone çıkıyor. Bu dronu Sabit kanatlı İHA (Fixed-Wİng İHA) ile değiştirmek istiyoruz. Sabit Kanatlı İHA'yı seçmek için QGC'ye geçiş yapıyoruz. QGC'de sol üstü kısımdaki "Q" simgesine tıklıyoruz ve Vehicle Setup'a tıklıyoruz. Açılan pencereden AİrFrame kısmından "Generic Standart Plane"'i seçip yukarıdan Upload ediyoruz. Ettikten sonra PX4'u yeniden başlatmak en temizi olabilir. Bu kısmı yaptıktan sonra PX4'u tekrar çalıştırdığımızda Gazebo'da artık drone yerine Sabit Kanatlı İHA'mız gözükecektir. Şİmdi QGC üzerinden gerekli uçuş rotasını belirledikten sonra 
+MAVSDK ile telemetry'leri görebileceğimiz ekranı terminalden görmemizi sağlabilir ve terminal üzerinden QGC'yı başlatabiliriz.
